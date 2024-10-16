@@ -1,85 +1,48 @@
 package com.booksrental.bookrental.service;
 
-import com.booksrental.bookrental.exception.BookNotFoundException;
 import com.booksrental.bookrental.model.Book;
-import com.booksrental.bookrental.repository.BooksRepository;
-import java.util.ArrayList;
+import com.booksrental.bookrental.repository.BookRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.stereotype.Service;
 
 @Service
 public class BookService {
-    private BooksRepository booksRepository;
 
-    BookService(BooksRepository booksRepository) {
-        this.booksRepository = booksRepository;
-    }
+    @Autowired
+    private BookRepository bookRepository;
 
-    public Book getBookById(String id) {
-        Optional<Book> optionalBook = booksRepository.findById(id);
-        return optionalBook.orElseThrow(() ->
-                new BookNotFoundException("Unable to find the book by id " + id));
-    }
-
-    public List<Book> getAllBooks() {
-        return booksRepository.findAll();
-    }
-
-    public List<Book> getBooksByName(String name) {
-        Optional<List<Book>> bookList = booksRepository.findByNameContainsIgnoreCase(name);
-
-        return bookList.orElse(new ArrayList<>());
-    }
-
-    public List<Book> getBooksByAuthorName(String authorName) {
-        Optional<List<Book>> bookList = booksRepository.findByAuthorContainsIgnoreCase(authorName);
-        return bookList.orElse(new ArrayList<>());
-    }
-
-    public List<Book> getBooksByUserId(String userId) {
-        Optional<List<Book>> bookList = booksRepository.findByUserId(userId);
-
-        return bookList.orElse(new ArrayList<>());
-    }
-
-    public Book createBook(Book book) {
-        booksRepository.save(book);
-        return book;
-    }
-
-    public List<Book> createBooks(List<Book> books) {
-        booksRepository.saveAll(books);
-        return books;
+    public Book addBook(Book book) {
+        return bookRepository.save(book);
     }
 
     public Book updateBook(Book book) {
-        Optional<Book> optionalBook = booksRepository.findById(book.getId());
-
-        if (!optionalBook.isPresent())
-            throw new BookNotFoundException("Unable to find the book by id : " + book.getId());
-
-        Book modifiableBook = optionalBook.get();
-        modifiableBook.setName(book.getName());
-        modifiableBook.setAuthor(book.getAuthor());
-        modifiableBook.setUserId(book.getUserId());
-        modifiableBook.setRented(book.isRented());
-
-        booksRepository.save(modifiableBook);
-        return modifiableBook;
+        // Check if book exists
+        Optional<Book> existingBook = bookRepository.findById(book.getId());
+        if (existingBook.isPresent()) {
+            return bookRepository.save(book);
+        } else {
+            // Handle case where book doesn't exist (e.g., throw exception)
+            throw new RuntimeException("Book not found");
+        }
     }
 
-    public void deleteAllBooks() {
-        booksRepository.deleteAll();
+    public void deleteBook(Long id) {
+        // Check if book exists
+        Optional<Book> existingBook = bookRepository.findById(id);
+        if (existingBook.isPresent()) {
+            bookRepository.deleteById(id);
+        } else {
+            // Handle case where book doesn't exist (e.g., throw exception)
+            throw new RuntimeException("Book not found");
+        }
     }
 
-    public void deleteBookById(String id) {
-        booksRepository.deleteById(id);
+    public List<Book> getAllBooks() {
+        return bookRepository.findAll();
     }
 
-    public void deleteBooksByUserId(String id) {
-        booksRepository.deleteBookByUserId(id);
-    }
+    // Add other methods as needed (e.g., getBookById, etc.)
 }

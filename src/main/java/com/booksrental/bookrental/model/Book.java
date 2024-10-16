@@ -1,35 +1,47 @@
 package com.booksrental.bookrental.model;
 
-import java.util.List;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.joda.time.DateTime;
-import org.joda.time.Instant;
-import org.springframework.data.annotation.*;
-import org.springframework.data.mongodb.core.mapping.DBRef;
-import org.springframework.data.mongodb.core.mapping.Document;
+import javax.persistence.*;
+import java.time.LocalDate;
 
+@Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-@Document(collection = "books")
 public class Book {
-    @Id
-    String id;
 
-    String name;
-    String author;
-    String userId;
-    String isbn;
-    String genre;
-    String year;
-    String url;
-    int bookRating;
-    int count;
-    boolean isRented;
-    @DBRef
-    List<BookReviews> bookReviews;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private String title;
+
+    @Column(nullable = false)
+    private String author;
+
+    @Column(nullable = false, unique = true)
+    private String isbn;
+
+    @Column(nullable = false)
+    private LocalDate publicationDate;
+
+    @Column(nullable = false)
+    private String genre;
+
+    @Column(nullable = false)
+    private String publisher;
+
+    @Column(nullable = false)
+    private int numberOfPages;
+
+    @Column(nullable = false)
+    private String edition;
+
+    @Column(nullable = false)
+    private String coverImage;
+
+    // Add other relevant fields as needed (e.g., copies available, etc.)
 }
